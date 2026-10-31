@@ -1,0 +1,12 @@
+{
+  "name": "quiet-house",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "start": "node scripts/serve.mjs",
+    "test": "node --test tests/*.test.mjs",
+    "check": "node --check src/game.js && node --check src/renderer.js && node --check src/model.js && node --check src/world.js && node --check src/objects.js && node --check src/inspection-art.js && node --check src/art.js && node --check src/progression.js && node --check src/story.js && node --check src/street-art.js && node --check src/economy.js && node --check src/audio.js && node --check src/notices.js && node --check src/protection.js && node --check src/protection-ui.js && node --check src/protection-art.js && node --check src/credits.js"
+  },
+  "engines": { "node": ">=22" }
+}

@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#171d24">
+  <title>Тихий дом — пиксельная игра</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cpath fill='%23dcb174' d='M3 15L16 3l13 12v15H3zm5 1v9h16v-9l-8-8z'/%3E%3C/svg%3E">
+  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="inspection.css">
+  <link rel="stylesheet" href="campaign.css">
+  <link rel="stylesheet" href="economy.css">
+  <link rel="stylesheet" href="protection.css">
+  <link rel="stylesheet" href="credits.css">
+</head>
+<body>
+  <main class="game-shell">
+    <section class="playfield" aria-label="Игровое поле">
+      <div class="scene-window">
+        <canvas id="game" width="960" height="540" tabindex="0" aria-label="Текущая комната. AD — ходить, WS — лестница, E — осмотр, пробел — применить, 1 и 2 — предмет, Q — положить предмет, Escape — пауза.">Для игры нужен браузер с поддержкой Canvas.</canvas>
+        <div class="scene-top">
+          <div><span id="chapter-label">День 1 · Вечер</span><span class="location"><span id="floor-label">1 этаж</span><b id="room-label">Прихожая</b></span></div>
+          <span class="night-time"><span id="wallet" aria-label="Деньги">0 ₽</span><span id="score">0 очков</span> <i aria-hidden="true">☾</i></span>
+        </div>
+        <div class="scene-tools">
+          <button id="journal-button" class="tool-button" aria-label="Дневник" title="Дневник">Дневник</button>
+          <button id="sound-button" class="tool-button" aria-label="Выключить звук" aria-pressed="false" title="Звук">♪</button>
+          <button id="help-button" class="tool-button" aria-label="Как играть" title="Как играть">?</button>
+          <button id="fullscreen-button" class="tool-button" aria-label="Полный экран" aria-pressed="false" title="Полный экран (F)">⛶</button>
+          <button id="pause-button" class="tool-button" aria-label="Пауза" title="Пауза (Esc)">Ⅱ</button>
+        </div>
+        <div id="display-message" role="status" hidden></div>
+        <aside id="quest-notice" class="quest-notice" role="status" aria-live="polite" hidden><span id="notice-icon" aria-hidden="true"></span><div><h2 id="notice-title"></h2><p id="notice-text"></p></div><button id="close-notice" class="icon-button" aria-label="Скрыть важную мысль">×</button></aside>
+        <button id="interaction" class="interaction" hidden></button>
+        <p id="thought" class="scene-thought" role="status">«Это просто старый дом. Просто старый дом…»</p>
+        <div class="scene-bottom"><span>Только эта комната</span><span id="explored">Комнаты: 1 / 6</span></div>
+      </div>
+      <div class="game-hud">
+        <section class="pocket-bar" aria-label="Инвентарь на два предмета"><div class="hud-caption">В руках <b id="inventory-count">0 / 2</b></div><div id="inventory"></div></section>
+        <div class="item-actions"><button id="attack-button" class="tool-button">Применить · 1 раз [Space]</button><button id="drop-button" class="tool-button">Положить <kbd>Q</kbd></button></div>
+        <section class="panic-panel" aria-label="Паника"><div class="panic-heading"><span>Паника <b id="panic-value">0%</b></span></div><div id="panic-meter" role="progressbar" aria-label="Уровень паники" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><div id="panic-fill"></div></div><span id="panic-rate">Пауков рядом нет · −1%/с</span></section>
+        <button id="nearby-button" class="tool-button" aria-label="Вещи рядом" aria-controls="nearby-panel" aria-expanded="false">Рядом <span id="nearby-count"></span></button>
+        <nav class="touch-controls" aria-label="Экранное управление"><div><button data-hold="left" aria-label="Идти влево">◀</button><button data-hold="right" aria-label="Идти вправо">▶</button><button data-hold="run" aria-label="Бежать (удерживать)">Бег</button></div><div><button data-hold="up" aria-label="Подняться">▲</button><button id="touch-action" aria-label="Осмотреть или использовать лестницу">E</button><button data-hold="down" aria-label="Спуститься">▼</button></div></nav>
+      </div>
+      <section id="nearby-panel" class="search-bar" aria-label="Вещи поблизости" hidden><header><span>Присмотреться рядом</span><button id="close-nearby" class="tool-button" aria-label="Закрыть список вещей">×</button></header><div id="nearby-objects"></div></section>
+    </section>
+    <div class="overlay" id="journal-overlay" hidden role="dialog" aria-modal="true" aria-labelledby="journal-title"><div class="journal-sheet"><header><h2 id="journal-title">Дневник</h2><button id="close-journal" class="icon-button" aria-label="Закрыть дневник">×</button></header><div class="thought"><span class="sheet-caption" id="day-footer">День 1</span><p id="journal-thought"></p></div><div class="objective"><span class="sheet-caption">На сегодня</span><p id="objective"></p><div class="room-dots" id="room-dots" aria-label="Посещённые комнаты"></div></div><section id="journal" class="journal" hidden aria-label="Запись в дневнике"><h2>Не только у меня</h2><p id="journal-text"></p><p id="supplies"></p></section></div></div>
+    <div class="overlay shop-overlay" id="shop-overlay" hidden role="dialog" aria-modal="true" aria-labelledby="shop-title"><div class="shop-sheet"><header><div><span class="sheet-caption">Хозяйственный магазин</span><h2 id="shop-title">Закрыть все щели</h2></div><button id="shop-pause" class="icon-button" aria-label="Пауза в магазине">Ⅱ</button><button id="close-shop" class="icon-button" aria-label="Выйти из магазина">×</button></header><p id="shop-wallet"></p><div id="shop-items"></div><p id="shop-note" role="status"></p><p class="shop-footnote">Один комплект покрывает все точки. Вернись домой: два окна и вентиляция для сетки, плинтус и труба для герметика. Точки отмечены в дневнике.</p></div></div>
+    <div class="overlay installation-overlay" id="installation-overlay" hidden role="dialog" aria-modal="true" aria-labelledby="installation-title"></div>
+    <div id="transition-overlay" hidden role="status" aria-live="polite"><span id="transition-caption"></span><h2 id="transition-title"></h2><p id="transition-description"></p></div>
+    <div class="overlay dialogue-overlay" id="dialogue-overlay" hidden role="dialog" aria-modal="true" aria-labelledby="dialogue-name"><div class="dialogue-sheet"><span class="sheet-caption">День 3 · Разговор на улице</span><h2 id="dialogue-name"></h2><p id="dialogue-text"></p><div class="dialogue-bottom"><span id="dialogue-page"></span><button class="primary-button" id="dialogue-next">Дальше</button></div></div></div>
+    <div class="overlay inspection-overlay" id="inspection-overlay" hidden role="dialog" aria-modal="true" aria-labelledby="inspection-title"><div class="inspection-sheet"><header><div><span class="sheet-caption">Присмотреться поближе</span><h2 id="inspection-title"></h2></div><button id="close-inspection" class="icon-button" aria-label="Закрыть осмотр">×</button></header><canvas id="inspection-art" width="640" height="320" aria-label="Подробный вид содержимого"></canvas><p id="inspection-description"></p><ul id="inspection-contents"></ul><div id="loot"></div><p id="inspection-hint" class="inspection-hint">E или Esc — закрыть</p></div></div>
+    <div class="overlay" id="pause-overlay" hidden role="dialog" aria-modal="true" aria-labelledby="overlay-title"><div class="pause-sheet"><span class="sheet-caption">Можно выдохнуть</span><h1 id="overlay-title">Тихо. Слишком тихо.</h1><p>В руках два предмета, каждый применяется один раз (промах тоже считается). Можно найти 10 разных предметов против пауков. Когда убиты все пауки, поднимись в спальню и ляг спать у кровати — только так наступит следующий день. До сна можно продолжать осмотр. В случайных местах спрятаны деньги: забирай их в кошелёк, руки не нужны. На третий день после совета соседа в «Хозтоварах» можно купить сетку и герметик. Вернись домой: сетка ставится на окна кухни и спальни и вентиляцию кабинета; герметик — на плинтус прихожей и ввод трубы кухни. Подойди, нажми E и пройди мини-игру. Стрелки совмещают сетку, Enter/пробел закрепляет углы или заделывает следующую точку шва. Есть экранные кнопки. Esc откладывает работу без расхода материалов. На третьем дне установи все пять точек защиты и уничтожь всех пауков, затем ляг спать у кровати в спальне — начнутся финальные титры. При обмороке деньги текущей попытки теряются, накопления прошлых дней остаются. В первый день в доме 2 паука, во второй — 4. Скрытых пауков тоже нужно найти и уничтожить. Вещи и пауки каждый день и после обморока прячутся в случайных местах. В комнате с обнаруженным пауком паника растёт на 3%/с, в другой комнате — на 1%/с. Без обнаруженных живых пауков падает на 1%/с. При 100% — обморок и начало текущего дня заново. На третий день выйдите из прихожей на улицу и расспросите людей.</p><dl><div><dt><kbd>A</kbd> <kbd>D</kbd> / <kbd>←</kbd> <kbd>→</kbd></dt><dd>Ходить · Shift — бег</dd></div><div><dt><kbd>W</kbd> <kbd>S</kbd></dt><dd>Лестница</dd></div><div><dt><kbd>E</kbd> / <kbd>Enter</kbd></dt><dd>Осмотреть / закрыть осмотр</dd></div><div><dt><kbd>1</kbd> <kbd>2</kbd> / <kbd>Q</kbd></dt><dd>Выбрать предмет / положить на пол</dd></div><div><dt><kbd>Space</kbd></dt><dd>Применить предмет</dd></div><div><dt><kbd>F</kbd> / <kbd>J</kbd></dt><dd>Полный экран / дневник</dd></div></dl><button id="resume-button" class="primary-button">Вернуться в дом</button></div></div>
+    <div id="credits-overlay" hidden role="dialog" aria-modal="true" aria-labelledby="credits-title" tabindex="0"></div>
+    <noscript>Включите JavaScript, чтобы войти в дом.</noscript>
+  </main>
+  <script type="module" src="src/game.js"></script>
+</body>
+</html>
